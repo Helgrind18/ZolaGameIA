@@ -10,9 +10,9 @@ from ZolaGameS import ZolaGame
 # ==========================================
 # CONFIGURAZIONE TORNEO
 # ==========================================
-FILE_STRATEGIA_ROSSO = "border"  # Nome del file senza il .py
+FILE_STRATEGIA_ROSSO = "playerStrategyImpl"  # Nome del file senza il .py
 FILE_STRATEGIA_BLU = "iterativeTrap"  # Nome del file senza il .py
-NUMERO_PARTITE = 20
+NUMERO_PARTITE = 1
 TIMEOUT_MOSSA = 3
 FILE_RISULTATI = "statistiche_zola.csv"
 
