@@ -7,8 +7,8 @@ import time
 
 # EXAMPLE VERSION
 # #######################
-import playerExampleRandom as playerBmodule
-import playerExampleAlpha as playerRmodule
+import itsATrap as playerBmodule
+import border as playerRmodule
 # #######################
 
 class Game:
