@@ -7,8 +7,8 @@ import time
 
 # EXAMPLE VERSION
 # #######################
-import itsATrap as playerBmodule
-import border as playerRmodule
+import playerExampleAlphaImplGiuseppe as playerBmodule
+import playerStrategyImplPasquale as playerRmodule
 # #######################
 
 class Game:
