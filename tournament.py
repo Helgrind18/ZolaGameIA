@@ -28,7 +28,6 @@ def load_strategy(module_name):
         print(f"ERRORE: Impossibile trovare il file '{module_name}.py'. Assicurati che sia nella stessa cartella.")
         exit(1)
 
-
 def play_headless_game(strategy_red, strategy_blue, game_index):
     """Gioca una singola partita senza interfaccia grafica e restituisce il vincitore."""
     game = ZolaGame(size=8, first_player="Red")
