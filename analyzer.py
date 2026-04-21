@@ -2,7 +2,92 @@ import csv
 import os
 from collections import defaultdict
 
+# Tentiamo di importare matplotlib per i grafici
+try:
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    GRAFICI_ABILITATI = True
+except ImportError:
+    GRAFICI_ABILITATI = False
+
 FILE_RISULTATI = "statistiche_zola.csv"
+
+
+def genera_grafici(stats_globali, scontri_diretti):
+    """Genera e mostra i grafici a partire dalle statistiche calcolate."""
+
+    # ---------------------------------------------------------
+    # GRAFICO 1: Winrate Globale
+    # ---------------------------------------------------------
+    strategie = []
+    winrates = []
+    colori = []
+
+    # Prepariamo i dati ordinati per winrate
+    ordinate = sorted(stats_globali.items(),
+                      key=lambda x: (x[1]['vinte'] / x[1]['giocate'] if x[1]['giocate'] > 0 else 0), reverse=True)
+
+    for strat, dati in ordinate:
+        strategie.append(strat)
+        wr = (dati['vinte'] / dati['giocate']) * 100 if dati['giocate'] > 0 else 0
+        winrates.append(wr)
+        colori.append('skyblue' if wr > 50 else 'lightcoral')
+
+    plt.figure(figsize=(10, 6))
+    barre = plt.bar(strategie, winrates, color=colori, edgecolor='black')
+    plt.title('Winrate Globale per Strategia', fontsize=14, fontweight='bold')
+    plt.ylabel('Percentuale di Vittoria (%)', fontsize=12)
+    plt.ylim(0, 105)
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+
+    # Aggiungiamo i valori sopra le barre
+    for rect in barre:
+        altezza = rect.get_height()
+        plt.text(rect.get_x() + rect.get_width() / 2.0, altezza + 1, f'{altezza:.1f}%', ha='center', va='bottom',
+                 fontweight='bold')
+
+    plt.tight_layout()
+
+    # ---------------------------------------------------------
+    # GRAFICO 2: Scontri Diretti (Stacked Bar Chart)
+    # ---------------------------------------------------------
+    matchups = []
+    perc_A = []
+    perc_B = []
+    perc_pareggi = []
+
+    for scontro, dati in scontri_diretti.items():
+        g = dati['giocate']
+        if g == 0: continue
+
+        matchups.append(scontro)
+        perc_A.append((dati['vinte_A'] / g) * 100)
+        perc_B.append((dati['vinte_B'] / g) * 100)
+        perc_pareggi.append((dati['pareggi'] / g) * 100)
+
+    fig, ax = plt.subplots(figsize=(12, 7))
+
+    # Creiamo le barre impilate
+    p1 = ax.bar(matchups, perc_A, color='lightgreen', edgecolor='black', label='Vittorie Strategia A (Sinistra)')
+    p2 = ax.bar(matchups, perc_B, bottom=perc_A, color='salmon', edgecolor='black',
+                label='Vittorie Strategia B (Destra)')
+
+    bottom_pareggi = [i + j for i, j in zip(perc_A, perc_B)]
+    p3 = ax.bar(matchups, perc_pareggi, bottom=bottom_pareggi, color='lightgray', edgecolor='black', label='Pareggi')
+
+    ax.set_title('Esito Scontri Diretti (Testa a Testa)', fontsize=14, fontweight='bold')
+    ax.set_ylabel('Distribuzione Esiti (%)', fontsize=12)
+    ax.set_ylim(0, 105)
+    ax.legend(loc='upper right', bbox_to_anchor=(1, 1.15), ncol=3)
+
+    # Etichette diagonali per non farle accavallare
+    plt.xticks(rotation=30, ha='right')
+
+    plt.tight_layout()
+
+    # Mostra entrambi i grafici
+    plt.show()
 
 
 def mostra_statistiche():
@@ -50,7 +135,7 @@ def mostra_statistiche():
                 stats_globali[blu]['perse'] += vinte_rosso
                 stats_globali[blu]['pareggi'] += pareggi
 
-                # Aggiorna Scontri Diretti (ordinamento alfabetico per raggruppare A vs B e B vs A)
+                # Aggiorna Scontri Diretti (ordinamento alfabetico)
                 strat_A, strat_B = sorted([rosso, blu])
                 chiave_scontro = f"{strat_A} VS {strat_B}"
 
@@ -73,7 +158,7 @@ def mostra_statistiche():
         print("Il file CSV è vuoto o non contiene dati validi.")
         return
 
-    # --- STAMPA DEL REPORT ---
+    # --- STAMPA DEL REPORT TESTUALE ---
     print("\n" + "=" * 50)
     print(" 📊 REPORT STATISTICHE TORNEI ZOLA")
     print("=" * 50)
@@ -121,6 +206,16 @@ def mostra_statistiche():
         print()
 
     print("=" * 50 + "\n")
+
+    # --- CHIAMATA AI GRAFICI ---
+    if GRAFICI_ABILITATI:
+        print("📈 Apertura delle finestre con i grafici in corso...")
+        genera_grafici(stats_globali, scontri_diretti)
+    else:
+        print("💡 SUGGERIMENTO: Vuoi vedere i grafici visuali?")
+        print("   Apri il terminale e digita:")
+        print("   pip install matplotlib numpy")
+        print("   Quindi riavvia questo script.\n")
 
 
 if __name__ == "__main__":
