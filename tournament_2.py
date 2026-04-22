@@ -11,8 +11,8 @@ from tournament import NUMERO_PARTITE
 # ==========================================
 # CONFIGURAZIONE TORNEO
 # ==========================================
-FILE_STRATEGIA_ROSSO = "playerStrategyImplPasquale"  # Nome del file senza il .py
-FILE_STRATEGIA_BLU = "playerExampleAlphaImplGiuseppe"  # Nome del file senza il .py
+FILE_STRATEGIA_ROSSO = "playerStrategyImplPasqualeOG"  # Nome del file senza il .py
+FILE_STRATEGIA_BLU = "playerStrategyImplPasqualeRandom"  # Nome del file senza il .py
 NUMERO_PARTITE = 15
 TIMEOUT_MOSSA = 2
 FILE_RISULTATI = "statistiche_"+FILE_STRATEGIA_ROSSO+"_"+FILE_STRATEGIA_BLU+"_NP_"+str(NUMERO_PARTITE)+"_TM_"+str(TIMEOUT_MOSSA)+".csv"

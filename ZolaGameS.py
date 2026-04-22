@@ -7,8 +7,8 @@ import time
 
 # EXAMPLE VERSION
 # #######################
-import playerExampleAlphaImplGiuseppe as playerBmodule
-import playerStrategyImplPasquale as playerRmodule
+import playerStrategyImplPasqualeMAX as playerBmodule
+import playerStrategyImplPasqualeOG as playerRmodule
 # #######################
 
 class Game:
