@@ -1,221 +1,190 @@
-import csv
 import os
+import glob
 from collections import defaultdict
 
-# Tentiamo di importare matplotlib per i grafici
 try:
+    import pandas as pd
     import matplotlib.pyplot as plt
-    import numpy as np
+    import seaborn as sns
 
-    GRAFICI_ABILITATI = True
+    LIBRERIE_AVANZATE = True
 except ImportError:
-    GRAFICI_ABILITATI = False
+    LIBRERIE_AVANZATE = False
 
-FILE_RISULTATI = "statistiche_zola.csv"
-
-
-def genera_grafici(stats_globali, scontri_diretti):
-    """Genera e mostra i grafici a partire dalle statistiche calcolate."""
-
-    # ---------------------------------------------------------
-    # GRAFICO 1: Winrate Globale
-    # ---------------------------------------------------------
-    strategie = []
-    winrates = []
-    colori = []
-
-    # Prepariamo i dati ordinati per winrate
-    ordinate = sorted(stats_globali.items(),
-                      key=lambda x: (x[1]['vinte'] / x[1]['giocate'] if x[1]['giocate'] > 0 else 0), reverse=True)
-
-    for strat, dati in ordinate:
-        strategie.append(strat)
-        wr = (dati['vinte'] / dati['giocate']) * 100 if dati['giocate'] > 0 else 0
-        winrates.append(wr)
-        colori.append('skyblue' if wr > 50 else 'lightcoral')
-
-    plt.figure(figsize=(10, 6))
-    barre = plt.bar(strategie, winrates, color=colori, edgecolor='black')
-    plt.title('Winrate Globale per Strategia', fontsize=14, fontweight='bold')
-    plt.ylabel('Percentuale di Vittoria (%)', fontsize=12)
-    plt.ylim(0, 105)
-    plt.grid(axis='y', linestyle='--', alpha=0.7)
-
-    # Aggiungiamo i valori sopra le barre
-    for rect in barre:
-        altezza = rect.get_height()
-        plt.text(rect.get_x() + rect.get_width() / 2.0, altezza + 1, f'{altezza:.1f}%', ha='center', va='bottom',
-                 fontweight='bold')
-
-    plt.tight_layout()
-
-    # ---------------------------------------------------------
-    # GRAFICO 2: Scontri Diretti (Stacked Bar Chart)
-    # ---------------------------------------------------------
-    matchups = []
-    perc_A = []
-    perc_B = []
-    perc_pareggi = []
-
-    for scontro, dati in scontri_diretti.items():
-        g = dati['giocate']
-        if g == 0: continue
-
-        matchups.append(scontro)
-        perc_A.append((dati['vinte_A'] / g) * 100)
-        perc_B.append((dati['vinte_B'] / g) * 100)
-        perc_pareggi.append((dati['pareggi'] / g) * 100)
-
-    fig, ax = plt.subplots(figsize=(12, 7))
-
-    # Creiamo le barre impilate
-    p1 = ax.bar(matchups, perc_A, color='lightgreen', edgecolor='black', label='Vittorie Strategia A (Sinistra)')
-    p2 = ax.bar(matchups, perc_B, bottom=perc_A, color='salmon', edgecolor='black',
-                label='Vittorie Strategia B (Destra)')
-
-    bottom_pareggi = [i + j for i, j in zip(perc_A, perc_B)]
-    p3 = ax.bar(matchups, perc_pareggi, bottom=bottom_pareggi, color='lightgray', edgecolor='black', label='Pareggi')
-
-    ax.set_title('Esito Scontri Diretti (Testa a Testa)', fontsize=14, fontweight='bold')
-    ax.set_ylabel('Distribuzione Esiti (%)', fontsize=12)
-    ax.set_ylim(0, 105)
-    ax.legend(loc='upper right', bbox_to_anchor=(1, 1.15), ncol=3)
-
-    # Etichette diagonali per non farle accavallare
-    plt.xticks(rotation=30, ha='right')
-
-    plt.tight_layout()
-
-    # Mostra entrambi i grafici
-    plt.show()
+PATTERN_FILE = "*_playerStrategyImpl*.csv"
 
 
 def mostra_statistiche():
-    if not os.path.exists(FILE_RISULTATI):
-        print(f"Errore: Il file '{FILE_RISULTATI}' non esiste.")
-        print("Esegui prima il file 'tournament.py' per generare dei dati.")
+    if not LIBRERIE_AVANZATE:
+        print("⚠️  Librerie avanzate non trovate!")
+        print("Per una reportistica completa e grafici avanzati, apri il terminale e digita:")
+        print("pip install pandas matplotlib seaborn\n")
         return
 
-    totale_tornei = 0
-    totale_partite = 0
-    tempo_totale = 0.0
-
-    # Statistiche globali per ogni strategia: { 'giocate': 0, 'vinte': 0, 'perse': 0, 'pareggi': 0 }
-    stats_globali = defaultdict(lambda: {'giocate': 0, 'vinte': 0, 'perse': 0, 'pareggi': 0})
-
-    # Scontri diretti (Testa a Testa)
-    scontri_diretti = defaultdict(lambda: {'giocate': 0, 'vinte_A': 0, 'vinte_B': 0, 'pareggi': 0})
-
-    try:
-        with open(FILE_RISULTATI, mode='r', encoding='utf-8') as file:
-            reader = csv.DictReader(file)
-            for row in reader:
-                totale_tornei += 1
-
-                rosso = row.get("Strategia Rosso", "Sconosciuto")
-                blu = row.get("Strategia Blu", "Sconosciuto")
-                giocate = int(row.get("Partite Giocate", 0))
-                vinte_rosso = int(row.get("Vittorie Rosso", 0))
-                vinte_blu = int(row.get("Vittorie Blu", 0))
-                pareggi = int(row.get("Pareggi", 0))
-                tempo = float(row.get("Tempo Totale (s)", 0.0))
-
-                totale_partite += giocate
-                tempo_totale += tempo
-
-                # Aggiorna statistiche Rosso
-                stats_globali[rosso]['giocate'] += giocate
-                stats_globali[rosso]['vinte'] += vinte_rosso
-                stats_globali[rosso]['perse'] += vinte_blu
-                stats_globali[rosso]['pareggi'] += pareggi
-
-                # Aggiorna statistiche Blu
-                stats_globali[blu]['giocate'] += giocate
-                stats_globali[blu]['vinte'] += vinte_blu
-                stats_globali[blu]['perse'] += vinte_rosso
-                stats_globali[blu]['pareggi'] += pareggi
-
-                # Aggiorna Scontri Diretti (ordinamento alfabetico)
-                strat_A, strat_B = sorted([rosso, blu])
-                chiave_scontro = f"{strat_A} VS {strat_B}"
-
-                is_rosso_A = (rosso == strat_A)
-
-                scontri_diretti[chiave_scontro]['giocate'] += giocate
-                scontri_diretti[chiave_scontro]['pareggi'] += pareggi
-                if is_rosso_A:
-                    scontri_diretti[chiave_scontro]['vinte_A'] += vinte_rosso
-                    scontri_diretti[chiave_scontro]['vinte_B'] += vinte_blu
-                else:
-                    scontri_diretti[chiave_scontro]['vinte_A'] += vinte_blu
-                    scontri_diretti[chiave_scontro]['vinte_B'] += vinte_rosso
-
-    except Exception as e:
-        print(f"Errore durante la lettura del CSV: {e}")
+    file_trovati = glob.glob(PATTERN_FILE)
+    if not file_trovati:
+        print(f"Errore: Nessun file corrispondente a '{PATTERN_FILE}' trovato.")
         return
 
-    if totale_partite == 0:
-        print("Il file CSV è vuoto o non contiene dati validi.")
+    print(f"📂 Sto analizzando {len(file_trovati)} file CSV...")
+
+    # Carica tutti i file CSV in un unico DataFrame
+    df_list = []
+    for f in file_trovati:
+        try:
+            temp_df = pd.read_csv(f)
+            df_list.append(temp_df)
+        except Exception as e:
+            print(f"Errore nella lettura di {f}: {e}")
+
+    if not df_list:
+        print("Nessun dato valido trovato nei file.")
         return
 
-    # --- STAMPA DEL REPORT TESTUALE ---
-    print("\n" + "=" * 50)
-    print(" 📊 REPORT STATISTICHE TORNEI ZOLA")
-    print("=" * 50)
-    print(f"Totale Tornei elaborati: {totale_tornei}")
-    print(f"Totale Partite giocate : {totale_partite}")
-    print(f"Tempo di calcolo totale: {tempo_totale:.2f} s")
-    print(f"Tempo medio per partita: {(tempo_totale / totale_partite):.2f} s")
+    df = pd.concat(df_list, ignore_index=True)
 
-    print("\n" + "-" * 50)
-    print(" 🏆 WINRATE GLOBALE (Tutte le partite)")
-    print("-" * 50)
+    # Assicuriamoci che ci siano le nuove colonne, altrimenti le riempiamo con 0 (retrocompatibilità)
+    nuove_colonne = ["Media Turni", "Timeouts Rosso", "Timeouts Blu",
+                     "Mosse Illegali Rosso", "Mosse Illegali Blu",
+                     "Tempo Medio Mossa Rosso (s)", "Tempo Medio Mossa Blu (s)"]
+    for col in nuove_colonne:
+        if col not in df.columns:
+            df[col] = 0.0
 
-    # Ordiniamo le strategie per numero di vittorie decrescente
-    strategie_ordinate = sorted(stats_globali.items(), key=lambda x: x[1]['vinte'], reverse=True)
+    # Dizionari per aggregare i dati
+    stats_agenti = defaultdict(lambda: {
+        'giocate': 0, 'vinte': 0, 'perse': 0, 'pareggi': 0,
+        'timeouts': 0, 'illegali': 0, 'somma_tempo': 0.0
+    })
 
-    for strat, dati in strategie_ordinate:
-        giocate = dati['giocate']
-        vinte = dati['vinte']
-        perse = dati['perse']
-        winrate = (vinte / giocate) * 100 if giocate > 0 else 0
+    matchups = defaultdict(lambda: {
+        'giocate': 0, 'vinte_A': 0, 'vinte_B': 0, 'pareggi': 0, 'somma_turni': 0.0
+    })
 
-        print(f"🤖 {strat.upper()}")
-        print(f"   Vittorie: {vinte} | Sconfitte: {perse} | Pareggi: {dati['pareggi']} | Partite: {giocate}")
-        print(f"   Winrate : {winrate:.1f}%")
+    tot_tornei = len(df)
+    tot_partite = df['Partite Giocate'].sum()
+
+    # Iteriamo riga per riga per smistare i dati (poiché un agente può essere Rosso o Blu)
+    for _, row in df.iterrows():
+        r = row['Strategia Rosso']
+        b = row['Strategia Blu']
+        g = row['Partite Giocate']
+
+        # Aggiornamento ROSSO
+        stats_agenti[r]['giocate'] += g
+        stats_agenti[r]['vinte'] += row['Vittorie Rosso']
+        stats_agenti[r]['perse'] += row['Vittorie Blu']
+        stats_agenti[r]['pareggi'] += row['Pareggi']
+        stats_agenti[r]['timeouts'] += row['Timeouts Rosso']
+        stats_agenti[r]['illegali'] += row['Mosse Illegali Rosso']
+        stats_agenti[r]['somma_tempo'] += row['Tempo Medio Mossa Rosso (s)'] * g
+
+        # Aggiornamento BLU
+        stats_agenti[b]['giocate'] += g
+        stats_agenti[b]['vinte'] += row['Vittorie Blu']
+        stats_agenti[b]['perse'] += row['Vittorie Rosso']
+        stats_agenti[b]['pareggi'] += row['Pareggi']
+        stats_agenti[b]['timeouts'] += row['Timeouts Blu']
+        stats_agenti[b]['illegali'] += row['Mosse Illegali Blu']
+        stats_agenti[b]['somma_tempo'] += row['Tempo Medio Mossa Blu (s)'] * g
+
+        # Aggiornamento Scontri Diretti
+        strat_A, strat_B = sorted([r, b])
+        chiave = f"{strat_A} VS {strat_B}"
+        matchups[chiave]['giocate'] += g
+        matchups[chiave]['pareggi'] += row['Pareggi']
+        matchups[chiave]['somma_turni'] += row['Media Turni'] * g
+
+        if r == strat_A:
+            matchups[chiave]['vinte_A'] += row['Vittorie Rosso']
+            matchups[chiave]['vinte_B'] += row['Vittorie Blu']
+        else:
+            matchups[chiave]['vinte_A'] += row['Vittorie Blu']
+            matchups[chiave]['vinte_B'] += row['Vittorie Rosso']
+
+    # --- REPORT TESTUALE ---
+    print("\n" + "=" * 60)
+    print(" 📊 REPORT STATISTICHE AVANZATE TORNEI ZOLA")
+    print("=" * 60)
+    print(f"Totale File Analizzati : {len(file_trovati)}")
+    print(f"Totale Tornei/Righe    : {tot_tornei}")
+    print(f"Totale Partite Giocate : {tot_partite}")
+    print("-" * 60)
+
+    # Preparazione dati per i DataFrame e i Grafici
+    dati_agenti = []
+    for agente, s in stats_agenti.items():
+        wr = (s['vinte'] / s['giocate']) * 100 if s['giocate'] > 0 else 0
+        t_medio = s['somma_tempo'] / s['giocate'] if s['giocate'] > 0 else 0
+        err_totali = s['timeouts'] + s['illegali']
+        dati_agenti.append({
+            'Agente': agente,
+            'Winrate (%)': wr,
+            'Giocate': s['giocate'],
+            'Timeouts': s['timeouts'],
+            'Illegali': s['illegali'],
+            'Errori Totali': err_totali,
+            'Tempo Medio (s)': t_medio
+        })
+
+    df_agenti = pd.DataFrame(dati_agenti).sort_values(by='Winrate (%)', ascending=False)
+
+    print(" 🏆 LEADERBOARD AGENTI (Ordinati per Winrate)")
+    for _, row in df_agenti.iterrows():
+        print(f"🤖 {row['Agente'].upper()}")
+        print(f"   Winrate: {row['Winrate (%)']:.1f}% ({row['Giocate']} partite)")
+        print(f"   Tempo medio per mossa: {row['Tempo Medio (s)']:.3f} s")
+        print(f"   Errori critici: {row['Errori Totali']} (Timeouts: {row['Timeouts']}, Illegali: {row['Illegali']})\n")
+
+    print("-" * 60)
+    print(" ⚔️  SCONTRI DIRETTI & DINAMICHE DI GIOCO")
+    for scontro, m in matchups.items():
+        A, B = scontro.split(" VS ")
+        wr_A = (m['vinte_A'] / m['giocate']) * 100
+        wr_B = (m['vinte_B'] / m['giocate']) * 100
+        turni_medi = m['somma_turni'] / m['giocate'] if m['giocate'] > 0 else 0
+
+        print(f"🔸 {scontro} ({m['giocate']} partite)")
+        print(f"   Durata media partita: {turni_medi:.1f} turni")
+        print(f"   Vittorie: {A} [{wr_A:.1f}%] - {B} [{wr_B:.1f}%]")
         print()
 
-    print("-" * 50)
-    print(" ⚔️  SCONTRI DIRETTI (Testa a Testa)")
-    print("-" * 50)
+    # --- GENERAZIONE GRAFICI CON SEABORN E MATPLOTLIB ---
+    print("📈 Generazione grafici in corso...")
+    sns.set_theme(style="whitegrid")
+    fig = plt.figure(figsize=(16, 10))
 
-    for scontro, dati in scontri_diretti.items():
-        strat_A, strat_B = scontro.split(" VS ")
-        vinte_A = dati['vinte_A']
-        vinte_B = dati['vinte_B']
-        giocate = dati['giocate']
+    # 1. Winrate
+    ax1 = plt.subplot(2, 2, 1)
+    sns.barplot(x='Winrate (%)', y='Agente', data=df_agenti, palette='viridis', ax=ax1)
+    ax1.set_title('Winrate Globale per Agente', fontweight='bold')
+    ax1.set_xlim(0, 100)
 
-        winrate_A = (vinte_A / giocate) * 100 if giocate > 0 else 0
-        winrate_B = (vinte_B / giocate) * 100 if giocate > 0 else 0
+    # 2. Tempi di Pensiero
+    ax2 = plt.subplot(2, 2, 2)
+    df_tempi = df_agenti.sort_values(by='Tempo Medio (s)')
+    sns.barplot(x='Tempo Medio (s)', y='Agente', data=df_tempi, palette='magma', ax=ax2)
+    ax2.set_title('Efficienza: Tempo Medio per Mossa', fontweight='bold')
 
-        print(f"🔸 {scontro} ({giocate} partite)")
-        print(f"   {strat_A}: {vinte_A} vittorie ({winrate_A:.1f}%)")
-        print(f"   {strat_B}: {vinte_B} vittorie ({winrate_B:.1f}%)")
-        if dati['pareggi'] > 0:
-            print(f"   Pareggi: {dati['pareggi']}")
-        print()
+    # 3. Errori e Affidabilità (Stacked)
+    ax3 = plt.subplot(2, 2, 3)
+    df_agenti_err = df_agenti.sort_values(by='Errori Totali', ascending=False)
+    ax3.bar(df_agenti_err['Agente'], df_agenti_err['Timeouts'], label='Timeouts', color='coral')
+    ax3.bar(df_agenti_err['Agente'], df_agenti_err['Illegali'], bottom=df_agenti_err['Timeouts'],
+            label='Mosse Illegali', color='firebrick')
+    ax3.set_title('Affidabilità: Errori Critici (Meno è meglio)', fontweight='bold')
+    ax3.tick_params(axis='x', rotation=30)
+    ax3.legend()
 
-    print("=" * 50 + "\n")
+    # 4. Durata Media Partite (Turni)
+    ax4 = plt.subplot(2, 2, 4)
+    scontri_nomi = list(matchups.keys())
+    turni_valori = [m['somma_turni'] / m['giocate'] if m['giocate'] > 0 else 0 for m in matchups.values()]
+    sns.barplot(x=turni_valori, y=scontri_nomi, palette='Blues_r', ax=ax4)
+    ax4.set_title('Durata Media Partite per Matchup (Turni)', fontweight='bold')
 
-    # --- CHIAMATA AI GRAFICI ---
-    if GRAFICI_ABILITATI:
-        print("📈 Apertura delle finestre con i grafici in corso...")
-        genera_grafici(stats_globali, scontri_diretti)
-    else:
-        print("💡 SUGGERIMENTO: Vuoi vedere i grafici visuali?")
-        print("   Apri il terminale e digita:")
-        print("   pip install matplotlib numpy")
-        print("   Quindi riavvia questo script.\n")
+    plt.tight_layout()
+    plt.show()
 
 
 if __name__ == "__main__":
