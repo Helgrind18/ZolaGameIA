@@ -1,6 +1,6 @@
 import math
 import time
-
+import random
 
 SAFETY_MARGIN = 0.08
 MAX_DEPTH = 20
@@ -86,7 +86,7 @@ def alphabeta(game, state, depth, alpha, beta, maximizing_player, root_player, d
             _check_timeout(deadline)
             child_state = game.result(state, move)
             child_value, _ = alphabeta(
-                game, child_state, depth - 1, alpha, beta, True, root_player, deadline
+                game, child_state, depth - 1, alpha, beta, random.choice([True, False]), root_player, deadline
             )
 
             if child_value > value:
