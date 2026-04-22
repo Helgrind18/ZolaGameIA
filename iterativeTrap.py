@@ -37,18 +37,18 @@ def evaluate_state(game, state, root_player):
             if p == opponent:
                 if lvl <= 2:
                     score += 40
-                elif lvl >= 8:
+                elif lvl >= 7:
                     score += 15
             elif p == root_player:
                 if 3 <= lvl <= 5:
                     score += 25
-                elif lvl <= 2:
+                else:
                     score -= 50
 
     # 3. MOBILITÀ
     root_mobility = len(game._actions_for_player(state, root_player))
     opp_mobility = len(game._actions_for_player(state, opponent))
-    score += 2 * (root_mobility - opp_mobility)
+    score += 3 * (root_mobility - opp_mobility)
 
     return score
 
@@ -81,7 +81,7 @@ def alphabeta(game, state, depth, alpha, beta, maximizing_player, root_player, s
             if alpha >= beta:
                 break
 
-        return value, random.choice(best_moves) if best_moves else None
+        return value, best_moves[0] if best_moves else None
 
     # Minimizing player
     value = math.inf
@@ -101,23 +101,19 @@ def alphabeta(game, state, depth, alpha, beta, maximizing_player, root_player, s
         if alpha >= beta:
             break
 
-    return value, random.choice(best_moves) if best_moves else None
+    return value, best_moves[0] if best_moves else None
 
 
 def playerStrategy(game, state, timeout=3):
-    """
-    Strategia con Iterative Deepening.
-    Sfrutta tutto il tempo a disposizione aumentando la profondità gradualmente.
-    """
+
     legal_moves = game.actions(state)
     if not legal_moves:
         return None
 
     start_time = time.perf_counter()
-    # Ci teniamo un margine di sicurezza di 0.15 secondi per chiudere le funzioni e ritornare il valore
     time_limit = timeout - 0.15
 
-    best_move_overall = random.choice(legal_moves)  # Fallback di sicurezza iniziale
+    best_move_overall = legal_moves[0]  # Fallback di sicurezza iniziale
     current_depth = 1
 
     try:
@@ -137,9 +133,6 @@ def playerStrategy(game, state, timeout=3):
             current_depth += 1
 
     except TimeoutException:
-        # Il tempo è scaduto! L'algoritmo si è interrotto a metà di una profondità.
-        # Stampiamo a che profondità siamo arrivati prima di stampare (utile per debug/statistiche)
-        # print(f"Timeout raggiunto. Profondità completa salvata: {current_depth - 1}")
         pass
 
     return best_move_overall

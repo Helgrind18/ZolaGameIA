@@ -1,7 +1,6 @@
 import math
 import random
 
-# RIPORTATO A 2: Evita il timeout dei 3 secondi sulla scacchiera 8x8
 SEARCH_DEPTH = 2
 
 
@@ -18,13 +17,10 @@ def evaluate_state(game, state, root_player):
     opponent = game.opponent(root_player)
     score = 0
 
-    # 1. VANTAGGIO MATERIALE (Fondamentale)
-    # L'IA deve comunque cercare di non farsi mangiare le pedine.
     root_count = state.count(root_player)
     opp_count = state.count(opponent)
     score += 100 * (root_count - opp_count)
 
-    # 2. STRATEGIA "BUCO NERO" (Posizionale)
     for r in range(state.size):
         for c in range(state.size):
             p = state.board[r][c]
@@ -39,7 +35,7 @@ def evaluate_state(game, state, root_player):
                 if lvl <= 2:
                     score += 40
                 # Lieve bonus se riusciamo a spingerlo sui bordi estremi (livello 8 o 9)
-                elif lvl >= 8:
+                elif lvl >= 7:
                     score += 15
             elif p == root_player:
                 # Vogliamo che le nostre pedine mantengano il controllo degli anelli intermedi (3, 4, 5)
@@ -47,14 +43,13 @@ def evaluate_state(game, state, root_player):
                 if 3 <= lvl <= 5:
                     score += 25
                 # Penalità se cadiamo noi stessi nel buco nero centrale
-                elif lvl <= 2:
+                else:
                     score -= 50
 
-    # 3. MOBILITÀ DI BASE
-    # Diamo un leggero peso a quante mosse abbiamo rispetto all'avversario per evitare lo stallo.
+
     root_mobility = len(game._actions_for_player(state, root_player))
     opp_mobility = len(game._actions_for_player(state, opponent))
-    score += 2 * (root_mobility - opp_mobility)
+    score += 3 * (root_mobility - opp_mobility)
 
     return score
 
@@ -84,7 +79,7 @@ def alphabeta(game, state, depth, alpha, beta, maximizing_player, root_player):
             if alpha >= beta:
                 break
 
-        return value, random.choice(best_moves) if best_moves else None
+        return value, best_moves[0] if best_moves else None
 
     value = math.inf
     for move in legal_moves:
@@ -103,7 +98,7 @@ def alphabeta(game, state, depth, alpha, beta, maximizing_player, root_player):
         if alpha >= beta:
             break
 
-    return value, random.choice(best_moves) if best_moves else None
+    return value, best_moves[0] if best_moves else None
 
 
 def playerStrategy(game, state, timeout=3):
