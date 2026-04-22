@@ -31,14 +31,11 @@ def load_strategy(module_name):
 
 
 def play_headless_game(strategy_red, strategy_blue, game_index):
-    # Ti consiglio di alternare chi inizia!
-    # first_to_move = "Red" if game_index % 2 != 0 else "Blue"
     game = ZolaGame(size=8, first_player="Red")
     state = game.initial
 
     strategies = {"Red": strategy_red, "Blue": strategy_blue}
 
-    # Inizializziamo i contatori
     stats_partita = {
         "turni_totali": 0,
         "Red": {"timeouts": 0, "mosse_illegali": 0, "tempo_totale_mosse": 0.0, "mosse_giocate": 0},
@@ -68,7 +65,6 @@ def play_headless_game(strategy_red, strategy_blue, game_index):
             except Exception as e:
                 move = None
 
-            # Calcolo tempo impiegato effettivo per la mossa
             tempo_impiegato = time.time() - start_mossa
             stats_partita[current_player]["tempo_totale_mosse"] += tempo_impiegato
             stats_partita[current_player]["mosse_giocate"] += 1
@@ -159,7 +155,6 @@ def main():
         f"Vittorie Blu ({FILE_STRATEGIA_BLU}): {stats['Blue']} (Timeouts: {agg_stats['Blue_timeouts']} | Mosse Illegali: {agg_stats['Blue_illegali']} | Tempo medio/mossa: {media_tempo_blue:.3f}s)")
     print(f"Pareggi: {stats['Draw']}")
 
-    # Salvataggio nel CSV con le nuove colonne
     with open(FILE_RISULTATI, mode='a', newline='') as file:
         writer = csv.writer(file)
 
