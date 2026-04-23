@@ -6,7 +6,7 @@ SAFETY_MARGIN = 0.08
 MAX_DEPTH = 20
 WIN_SCORE = 100_000
 
-# Filosofia semplice e coerente con ciò che sta funzionando
+# Filosofia semplice e coerente con  ciò che sta funzionando
 PIECE_WEIGHT = 1000
 MOBILITY_WEIGHT = 5
 BORDER_MULTIPLIER = 10
