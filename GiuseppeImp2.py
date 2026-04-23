@@ -5,7 +5,7 @@ import time
 # --- COSTANTI DI SISTEMA ---
 # Limite di sicurezza a 2.9 come da tua richiesta.
 # Se il calcolo supera questo tempo, il bot restituisce l'ultima mossa migliore trovata.
-TIME_LIMIT = 2.9
+TIME_LIMIT = 2.87
 
 # Memoria globale per non ricalcolare scacchiere già viste
 EVAL_CACHE = {}

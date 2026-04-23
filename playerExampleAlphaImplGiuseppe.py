@@ -5,7 +5,7 @@ import time
 # --- COSTANTI DI TEMPO ---
 # Ci teniamo un margine di sicurezza di 0.10 secondi per evitare che il main
 # thread ci tagli fuori per il timeout dei 3 secondi.
-TIME_LIMIT = 2.86
+TIME_LIMIT = 2.87
 
 
 """"
