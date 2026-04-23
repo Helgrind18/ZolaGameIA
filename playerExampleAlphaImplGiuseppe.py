@@ -5,7 +5,8 @@ import time
 # --- COSTANTI DI TEMPO ---
 # Ci teniamo un margine di sicurezza di 0.10 secondi per evitare che il main
 # thread ci tagli fuori per il timeout dei 3 secondi.
-TIME_LIMIT = 2.9
+TIME_LIMIT = 2.86
+
 
 """"
 def evaluate_state(game, state, root_player):
