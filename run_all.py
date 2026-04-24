@@ -8,10 +8,7 @@ strategie_da_testare = [
     "playerStrategyImplPasqualeRandom",
     "playerStrategyImplPasqualeMAX",
     "playerExampleAlphaImplGiuseppe",
-    "border",
     "GiuseppeImp2",
-    "iterativeTrap",
-    "phalanx"
 ]
 
 NUM_PARTITE = "15"

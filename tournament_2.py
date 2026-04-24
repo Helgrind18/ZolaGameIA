@@ -4,6 +4,7 @@ import csv
 import random
 import concurrent.futures
 import argparse
+import os
 
 from ZolaGameS import ZolaGame
 from tournament import NUMERO_PARTITE
@@ -23,18 +24,23 @@ FILE_STRATEGIA_ROSSO = args.rosso
 FILE_STRATEGIA_BLU = args.blu
 NUMERO_PARTITE = args.partite
 TIMEOUT_MOSSA = args.timeout
-FILE_RISULTATI = f"statistiche_{FILE_STRATEGIA_ROSSO}_{FILE_STRATEGIA_BLU}_NP_{NUMERO_PARTITE}_TM_{TIMEOUT_MOSSA}.csv"
+
+os.makedirs("risultati", exist_ok=True)
+
+FILE_RISULTATI = f"risultati/statistiche_{FILE_STRATEGIA_ROSSO}_{FILE_STRATEGIA_BLU}_NP_{NUMERO_PARTITE}_TM_{TIMEOUT_MOSSA}.csv"
 # ==========================================
 
 
 # ==========================================
 
 def load_strategy(module_name):
+    """Carica dinamicamente il modulo Python contenente la strategia dalla cartella 'agenti'."""
     try:
-        module = importlib.import_module(module_name)
+        module = importlib.import_module(f"agenti.{module_name}")
         return module.playerStrategy
-    except ImportError:
-        print(f"ERRORE: Impossibile trovare il file '{module_name}.py'. Assicurati che sia nella stessa cartella.")
+    except ImportError as e:
+        print(f"ERRORE: Impossibile trovare il file '{module_name}.py' nella cartella 'agenti'.")
+        print(f"Dettaglio errore: {e}")
         exit(1)
 
 
