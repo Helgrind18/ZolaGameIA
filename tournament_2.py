@@ -3,25 +3,33 @@ import time
 import csv
 import random
 import concurrent.futures
+import argparse
 
-# Importiamo solo la logica di gioco dal tuo file originale, ignorando la GUI
 from ZolaGameS import ZolaGame
 from tournament import NUMERO_PARTITE
 
 # ==========================================
-# CONFIGURAZIONE TORNEO
+# CONFIGURAZIONE TORNEO DA RIGA DI COMANDO
 # ==========================================
-FILE_STRATEGIA_ROSSO = "playerStrategyImplPasqualeOG"  # Nome del file senza il .py
-FILE_STRATEGIA_BLU = "playerStrategyImplPasqualeRandom"  # Nome del file senza il .py
-NUMERO_PARTITE = 15
-TIMEOUT_MOSSA = 2
-FILE_RISULTATI = "statistiche_"+FILE_STRATEGIA_ROSSO+"_"+FILE_STRATEGIA_BLU+"_NP_"+str(NUMERO_PARTITE)+"_TM_"+str(TIMEOUT_MOSSA)+".csv"
+parser = argparse.ArgumentParser(description="Script per tornei ZolaGame")
+parser.add_argument("--rosso", type=str, default="playerStrategyImplPasqualeOG", help="Nome file strategia giocatore Rosso")
+parser.add_argument("--blu", type=str, default="playerStrategyImplPasqualeRandom", help="Nome file strategia giocatore Blu")
+parser.add_argument("--partite", type=int, default=15, help="Numero di partite")
+parser.add_argument("--timeout", type=float, default=3.0, help="Timeout per mossa in secondi")
+
+args = parser.parse_args()
+
+FILE_STRATEGIA_ROSSO = args.rosso
+FILE_STRATEGIA_BLU = args.blu
+NUMERO_PARTITE = args.partite
+TIMEOUT_MOSSA = args.timeout
+FILE_RISULTATI = f"statistiche_{FILE_STRATEGIA_ROSSO}_{FILE_STRATEGIA_BLU}_NP_{NUMERO_PARTITE}_TM_{TIMEOUT_MOSSA}.csv"
+# ==========================================
 
 
 # ==========================================
 
 def load_strategy(module_name):
-    """Carica dinamicamente il modulo Python contenente la strategia."""
     try:
         module = importlib.import_module(module_name)
         return module.playerStrategy
@@ -78,7 +86,6 @@ def play_headless_game(strategy_red, strategy_blue, game_index):
 
     winner = game.winner(state)
 
-    # Ritorna non solo il vincitore, ma tutte le metriche
     return winner, stats_partita
 
 
@@ -90,14 +97,12 @@ def main():
     strat_red = load_strategy(FILE_STRATEGIA_ROSSO)
     strat_blue = load_strategy(FILE_STRATEGIA_BLU)
 
-    # Statistiche standard
     stats = {
         "Red": 0,
         "Blue": 0,
         "Draw": 0
     }
 
-    # Nuove statistiche aggregate per l'intero torneo
     agg_stats = {
         "turni_totali": 0,
         "Red_timeouts": 0,
@@ -113,7 +118,6 @@ def main():
     start_time = time.time()
 
     for i in range(1, NUMERO_PARTITE + 1):
-        # spacchettiamo i due valori restituiti dalla nuova funzione
         winner, stats_partita = play_headless_game(strat_red, strat_blue, i)
 
         if winner == "Red":
@@ -123,7 +127,6 @@ def main():
         else:
             stats["Draw"] += 1
 
-        # Sommiamo i dati di questa partita ai totali del torneo
         agg_stats["turni_totali"] += stats_partita["turni_totali"]
         agg_stats["Red_timeouts"] += stats_partita["Red"]["timeouts"]
         agg_stats["Blue_timeouts"] += stats_partita["Blue"]["timeouts"]
@@ -137,14 +140,12 @@ def main():
 
     elapsed_time = time.time() - start_time
 
-    # Calcolo delle medie
     media_turni = agg_stats["turni_totali"] / NUMERO_PARTITE if NUMERO_PARTITE > 0 else 0
     media_tempo_red = agg_stats["Red_tempo_mosse"] / agg_stats["Red_mosse_totali"] if agg_stats[
                                                                                           "Red_mosse_totali"] > 0 else 0
     media_tempo_blue = agg_stats["Blue_tempo_mosse"] / agg_stats["Blue_mosse_totali"] if agg_stats[
                                                                                              "Blue_mosse_totali"] > 0 else 0
 
-    # Stampa risultati a schermo
     print("-" * 40)
     print("TORNEO CONCLUSO")
     print(f"Tempo totale: {elapsed_time:.2f} secondi")
@@ -158,7 +159,6 @@ def main():
     with open(FILE_RISULTATI, mode='a', newline='') as file:
         writer = csv.writer(file)
 
-        # Scrive l'intestazione allargata se il file è vuoto
         if file.tell() == 0:
             writer.writerow([
                 "Strategia Rosso", "Strategia Blu", "Partite Giocate",
@@ -168,7 +168,6 @@ def main():
                 "Tempo Medio Mossa Rosso (s)", "Tempo Medio Mossa Blu (s)"
             ])
 
-        # Scrive i dati della riga
         writer.writerow([
             FILE_STRATEGIA_ROSSO,
             FILE_STRATEGIA_BLU,
