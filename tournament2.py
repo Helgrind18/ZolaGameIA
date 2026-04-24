@@ -10,7 +10,7 @@ from ZolaGameS import ZolaGame
 # ELIMINATO: from tournament import NUMERO_PARTITE (causava il crash)
 
 # ==========================================
-# CONFIGURAZIONE TORNEO
+# CONFIGURATION   TORNEO
 # ==========================================
 FILE_STRATEGIA_ROSSO = "playerExampleAlphaImplGiuseppe"  # Nome del file senza il .py
 FILE_STRATEGIA_BLU = "GiuseppeImp2"  # Nome del file senza il  .py
