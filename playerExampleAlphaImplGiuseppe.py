@@ -5,14 +5,15 @@ import time
 # --- COSTANTI DI TEMPO ---
 # Ci teniamo un margine di sicurezza di 0.10 secondi per evitare che il main
 # thread ci tagli fuori per il timeout dei 3 secondi.
-TIME_LIMIT = 2.9
+TIME_LIMIT = 2.87
+
 
 """"
 def evaluate_state(game, state, root_player):
-
+    
     #Funzione di Valutazione Euristica.
     #Stima quanto è vantaggioso uno stato per il root_player.
-
+    
     winner = game.winner(state)
     if winner == root_player:
         return 100_000  # Vittoria: valore massimo assoluto
@@ -56,7 +57,6 @@ def evaluate_state(game, state, root_player):
     # Sommiamo i pesi per ottenere il valore finale dello stato
     return material_score + mobility_score + center_score
 """
-
 
 def evaluate_state(game, state, root_player):
     """"
@@ -103,7 +103,6 @@ def evaluate_state(game, state, root_player):
                     border_score -= pos_value
 
     return material_score + mobility_score + border_score
-
 
 def alphabeta(game, state, depth, alpha, beta, maximizing_player, root_player, start_time):
     """
