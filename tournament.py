@@ -10,11 +10,11 @@ from ZolaGameS import ZolaGame
 # ==========================================
 # CONFIGURAZIONE TORNEO
 # ==========================================
-FILE_STRATEGIA_ROSSO = "playerStrategyImplPasquale"  # Nome del file senza il .py
-FILE_STRATEGIA_BLU = "ghost"  # Nome del file senza il .py
-NUMERO_PARTITE = 10
+FILE_STRATEGIA_ROSSO = "playerExampleAlphaImplGiuseppe"  # Nome del file senza il .py
+FILE_STRATEGIA_BLU = "playerExampleAlphaImplGiuseppe"  # Nome del file senza il  .py
+NUMERO_PARTITE = 20
 TIMEOUT_MOSSA = 3
-FILE_RISULTATI = "statistiche_"+FILE_STRATEGIA_ROSSO+"_"+FILE_STRATEGIA_BLU+".csv"
+FILE_RISULTATI = "statistiche_zola.csv"
 
 
 # ==========================================
@@ -27,6 +27,7 @@ def load_strategy(module_name):
     except ImportError:
         print(f"ERRORE: Impossibile trovare il file '{module_name}.py'. Assicurati che sia nella stessa cartella.")
         exit(1)
+
 
 def play_headless_game(strategy_red, strategy_blue, game_index):
     """Gioca una singola partita senza interfaccia grafica e restituisce il vincitore."""
