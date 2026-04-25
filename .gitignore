@@ -1,2 +1,5 @@
 __pycache__/
 *.pyc
+
+# File statistiche generati
+statistiche_*.csv
