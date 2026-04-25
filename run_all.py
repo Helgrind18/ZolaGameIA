@@ -31,7 +31,6 @@ def esegui_torneo(giocatori):
     ])
     print(f"[FINE] {rosso} VS {blu}")
 
-# thread pool perchè così ottimizziamo l'uso dei thread
 with concurrent.futures.ThreadPoolExecutor(max_workers=NUMERO_MASSIMO_TORNEI_IN_PARALLELO) as executor:
     executor.map(esegui_torneo, combinazioni)
 

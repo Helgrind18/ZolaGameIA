@@ -14,7 +14,7 @@ FILE_STRATEGIA_ROSSO = "playerExampleAlphaImplGiuseppe"  # Nome del file senza i
 FILE_STRATEGIA_BLU = "playerExampleAlphaImplGiuseppe"  # Nome del file senza il  .py
 NUMERO_PARTITE = 20
 TIMEOUT_MOSSA = 3
-FILE_RISULTATI = "statistiche_zola.csv"
+FILE_RISULTATI = "ciao.csv"
 
 
 # ==========================================

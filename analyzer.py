@@ -11,7 +11,7 @@ try:
 except ImportError:
     LIBRERIE_AVANZATE = False
 
-PATTERN_FILE = os.path.join("risultati", "*_playerStrategyImpl*.csv")
+PATTERN_FILE = os.path.join("risultati", "*.csv")
 
 def mostra_statistiche():
     if not LIBRERIE_AVANZATE:
