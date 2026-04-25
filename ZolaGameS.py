@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import simpledialog, messagebox
+from tkinter import simpledialog
 import random
 import concurrent.futures
 import threading
@@ -7,8 +7,8 @@ import time
 
 # EXAMPLE VERSION
 # #######################
-import  GiuseppeImp2  as playerBmodule          # Vecchia strategia (assegnata al Blu)
-import  playerExampleAlphaImplGiuseppe as playerRmodule # Nuova strategia (assegnata al Rosso)
+from agenti import GiuseppeImp2 as playerBmodule
+from agenti import  playerExampleAlphaImplGiuseppe as playerRmodule # Nuova strategia (assegnata al Rosso)
 
 #import playerExampleRandom as playerBmodule
 #import playerExampleAlpha as playerRmodule
