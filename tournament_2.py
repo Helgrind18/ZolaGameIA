@@ -13,8 +13,8 @@ from tournament import NUMERO_PARTITE
 # CONFIGURAZIONE TORNEO DA RIGA DI COMANDO
 # ==========================================
 parser = argparse.ArgumentParser(description="Script per tornei ZolaGame")
-parser.add_argument("--rosso", type=str, default="playerStrategyImplPasqualeOG", help="Nome file strategia giocatore Rosso")
-parser.add_argument("--blu", type=str, default="playerStrategyImplPasqualeRandom", help="Nome file strategia giocatore Blu")
+parser.add_argument("--rosso", type=str, default="playerBal", help="Nome file strategia giocatore Rosso")
+parser.add_argument("--blu", type=str, default="playerBal", help="Nome file strategia giocatore Blu")
 parser.add_argument("--partite", type=int, default=15, help="Numero di partite")
 parser.add_argument("--timeout", type=float, default=3.0, help="Timeout per mossa in secondi")
 
