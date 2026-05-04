@@ -4,14 +4,16 @@ import itertools
 
 # Inserire nella lista i nomi dei file contenenti le strategie, senza il ".py"
 strategie_da_testare = [
-    "playerZen",
+    "GiuseppeImp2",
     "playerBal",
-    "playerStrategyImplPasqualeOG"
+    "playerStrategyImplPasqualeOG",
+    "playerYin"
+
 ]
 
 NUM_PARTITE = "15"
 TIMEOUT = "3"
-NUMERO_MASSIMO_TORNEI_IN_PARALLELO = 5
+NUMERO_MASSIMO_TORNEI_IN_PARALLELO = 2
 
 # due agenti si affrontano una volta sola, cambiare "combinations" con "permutations" per fare "andata e ritorno"
 combinazioni = list(itertools.permutations(strategie_da_testare, 2))
