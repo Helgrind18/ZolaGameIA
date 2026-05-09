@@ -13,8 +13,8 @@ from tournament import NUMERO_PARTITE
 # CONFIGURAZIONE TORNEO DA RIGA DI COMANDO
 # ==========================================
 parser = argparse.ArgumentParser(description="Script per tornei ZolaGame")
-parser.add_argument("--rosso", type=str, default="playerStrategyImplPasqualeOG", help="Nome file strategia giocatore Rosso")
-parser.add_argument("--blu", type=str, default="playerStrategyImplPasqualeRandom", help="Nome file strategia giocatore Blu")
+parser.add_argument("--rosso", type=str, default="playerBal", help="Nome file strategia giocatore Rosso")
+parser.add_argument("--blu", type=str, default="playerBal", help="Nome file strategia giocatore Blu")
 parser.add_argument("--partite", type=int, default=15, help="Numero di partite")
 parser.add_argument("--timeout", type=float, default=3.0, help="Timeout per mossa in secondi")
 
@@ -124,14 +124,22 @@ def main():
     start_time = time.time()
 
     for i in range(1, NUMERO_PARTITE + 1):
+        print(f"\nPartita {i}/{NUMERO_PARTITE} in corso...")
+        start_partita = time.time()
+
         winner, stats_partita = play_headless_game(strat_red, strat_blue, i)
+
+        durata_partita = time.time() - start_partita
 
         if winner == "Red":
             stats["Red"] += 1
+            nome_winner = FILE_STRATEGIA_ROSSO
         elif winner == "Blue":
             stats["Blue"] += 1
+            nome_winner = FILE_STRATEGIA_BLU
         else:
             stats["Draw"] += 1
+            nome_winner = "Pareggio"
 
         agg_stats["turni_totali"] += stats_partita["turni_totali"]
         agg_stats["Red_timeouts"] += stats_partita["Red"]["timeouts"]
@@ -143,6 +151,46 @@ def main():
         agg_stats["Blue_tempo_mosse"] += stats_partita["Blue"]["tempo_totale_mosse"]
         agg_stats["Red_mosse_totali"] += stats_partita["Red"]["mosse_giocate"]
         agg_stats["Blue_mosse_totali"] += stats_partita["Blue"]["mosse_giocate"]
+
+        media_tempo_red_partita = (
+            stats_partita["Red"]["tempo_totale_mosse"] / stats_partita["Red"]["mosse_giocate"]
+            if stats_partita["Red"]["mosse_giocate"] > 0 else 0
+        )
+
+        media_tempo_blue_partita = (
+            stats_partita["Blue"]["tempo_totale_mosse"] / stats_partita["Blue"]["mosse_giocate"]
+            if stats_partita["Blue"]["mosse_giocate"] > 0 else 0
+        )
+
+        print("-" * 40)
+        print(f"PARTITA {i} FINITA")
+        print(f"Vincitore: {winner} ({nome_winner})")
+        print(f"Durata partita: {durata_partita:.2f} secondi")
+        print(f"Turni totali: {stats_partita['turni_totali']}")
+
+        print(
+            f"Rosso ({FILE_STRATEGIA_ROSSO}) -> "
+            f"Timeouts: {stats_partita['Red']['timeouts']} | "
+            f"Mosse illegali: {stats_partita['Red']['mosse_illegali']} | "
+            f"Mosse giocate: {stats_partita['Red']['mosse_giocate']} | "
+            f"Tempo medio/mossa: {media_tempo_red_partita:.3f}s"
+        )
+
+        print(
+            f"Blu ({FILE_STRATEGIA_BLU}) -> "
+            f"Timeouts: {stats_partita['Blue']['timeouts']} | "
+            f"Mosse illegali: {stats_partita['Blue']['mosse_illegali']} | "
+            f"Mosse giocate: {stats_partita['Blue']['mosse_giocate']} | "
+            f"Tempo medio/mossa: {media_tempo_blue_partita:.3f}s"
+        )
+
+        print(
+            f"Parziale torneo -> "
+            f"{FILE_STRATEGIA_ROSSO} da Rosso: {stats['Red']} vittorie | "
+            f"{FILE_STRATEGIA_BLU} da Blu: {stats['Blue']} vittorie | "
+            f"Pareggi: {stats['Draw']}"
+        )
+        print("-" * 40)
 
     elapsed_time = time.time() - start_time
 

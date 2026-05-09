@@ -1,11 +1,12 @@
 import math
 import time
-import random
+
 
 SAFETY_MARGIN = 0.08
 MAX_DEPTH = 20
 WIN_SCORE = 100_000
 
+# Filosofia semplice e coerente con ciò che sta funzionando
 PIECE_WEIGHT = 1000
 MOBILITY_WEIGHT = 5
 BORDER_MULTIPLIER = 10
@@ -31,48 +32,32 @@ def evaluate_state(game, state, root_player):
     if winner is not None:
         return 0
 
-    # 1. MATERIALE (Uguale per entrambi)
     my_pieces = state.count(root_player)
     opp_pieces = state.count(opponent)
     material_score = PIECE_WEIGHT * (my_pieces - opp_pieces)
 
-    # Estrazione mosse per calcolare la mobilità
     my_moves = game._actions_for_player(state, root_player)
     opp_moves = game._actions_for_player(state, opponent)
+    mobility_score = MOBILITY_WEIGHT * (len(my_moves) - len(opp_moves))
 
-    # Estrazione livelli per il controllo dei bordi
-    levels = game.get_all_distance_levels()
     border_score = 0
+    levels = game.get_all_distance_levels()
+
     for r in range(state.size):
         for c in range(state.size):
             piece = state.board[r][c]
             if piece is None:
                 continue
+
             pos_value = levels[r][c] * BORDER_MULTIPLIER
+
             if piece == root_player:
                 border_score += pos_value
             else:
                 border_score -= pos_value
 
-    # --- BIVIO STRATEGICO: ROSSO VS BLU ---
+    return material_score + mobility_score + border_score
 
-    if root_player == "Red":
-        # STRATEGIA ROSSO: La tua formula originale (Aggressiva e Matematica)
-        mobility_score = MOBILITY_WEIGHT * (len(my_moves) - len(opp_moves))
-        return material_score + mobility_score + border_score
-
-    else:
-        # STRATEGIA BLU: Asimmetrica, Ostruzionistica e con Fattore Caos
-
-        # Ostruzionismo: Penalizziamo le mosse dell'avversario molto più pesantemente
-        # (es. moltiplichiamo per 15 invece del normale MOBILITY_WEIGHT di 5)
-        mobility_score = (MOBILITY_WEIGHT * len(my_moves)) - (15 * len(opp_moves))
-
-        # Fattore Caos: Un minuscolo rumore casuale che non intacca le logiche di materiale,
-        # ma rompe gli stalli e la prevedibilità contro bot deterministici.
-        noise = random.uniform(0.0, 0.9)
-
-        return material_score + mobility_score + border_score + noise
 
 def _move_order_key(move):
     # catture prima, poi ordine stabile

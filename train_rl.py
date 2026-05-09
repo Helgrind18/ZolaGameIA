@@ -3,7 +3,7 @@ import itertools
 
 
 strategie_da_testare = [
-    "playerStrategyImplPasqualeRL",  # IL NOSTRO AGENTE IN ADDESTRAMENTO
+    "playerStrategyImplPasqualeRL",
     "playerStrategyImplPasqualeOG",
     "playerStrategyImplPasqualeRandom",
     "playerStrategyImplPasqualeMAX",

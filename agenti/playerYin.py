@@ -6,9 +6,13 @@ SAFETY_MARGIN = 0.08
 MAX_DEPTH = 20
 WIN_SCORE = 100_000
 
+# Filosofia originale (senza dirupi)
 PIECE_WEIGHT = 1000
 MOBILITY_WEIGHT = 5
 BORDER_MULTIPLIER = 10
+
+# Cache globale per velocizzare l'albero
+EVAL_CACHE = {}
 
 
 class SearchTimeout(Exception):
@@ -21,6 +25,13 @@ def _check_timeout(deadline: float) -> None:
 
 
 def evaluate_state(game, state, root_player):
+    # Cache con tuple (velocissima)
+    board_hash = tuple(tuple(row) for row in state.board)
+    cache_key = (board_hash, root_player)
+
+    if cache_key in EVAL_CACHE:
+        return EVAL_CACHE[cache_key]
+
     winner = game.winner(state)
     opponent = game.opponent(root_player)
 
@@ -31,18 +42,15 @@ def evaluate_state(game, state, root_player):
     if winner is not None:
         return 0
 
-    # 1. MATERIALE (Uguale per entrambi)
     my_pieces = state.count(root_player)
     opp_pieces = state.count(opponent)
     material_score = PIECE_WEIGHT * (my_pieces - opp_pieces)
 
-    # Estrazione mosse per calcolare la mobilità
     my_moves = game._actions_for_player(state, root_player)
     opp_moves = game._actions_for_player(state, opponent)
 
-    # Estrazione livelli per il controllo dei bordi
-    levels = game.get_all_distance_levels()
     border_score = 0
+    levels = game.get_all_distance_levels()
     for r in range(state.size):
         for c in range(state.size):
             piece = state.board[r][c]
@@ -54,28 +62,21 @@ def evaluate_state(game, state, root_player):
             else:
                 border_score -= pos_value
 
-    # --- BIVIO STRATEGICO: ROSSO VS BLU ---
-
     if root_player == "Red":
-        # STRATEGIA ROSSO: La tua formula originale (Aggressiva e Matematica)
+        # Rosso gioca in attacco
         mobility_score = MOBILITY_WEIGHT * (len(my_moves) - len(opp_moves))
-        return material_score + mobility_score + border_score
-
+        final_score = material_score + mobility_score + border_score
     else:
-        # STRATEGIA BLU: Asimmetrica, Ostruzionistica e con Fattore Caos
-
-        # Ostruzionismo: Penalizziamo le mosse dell'avversario molto più pesantemente
-        # (es. moltiplichiamo per 15 invece del normale MOBILITY_WEIGHT di 5)
+        # Blu gioca in ostruzionismo + rumore per rompere le simmetrie
         mobility_score = (MOBILITY_WEIGHT * len(my_moves)) - (15 * len(opp_moves))
-
-        # Fattore Caos: Un minuscolo rumore casuale che non intacca le logiche di materiale,
-        # ma rompe gli stalli e la prevedibilità contro bot deterministici.
         noise = random.uniform(0.0, 0.9)
+        final_score = material_score + mobility_score + border_score + noise
 
-        return material_score + mobility_score + border_score + noise
+    EVAL_CACHE[cache_key] = final_score
+    return final_score
+
 
 def _move_order_key(move):
-    # catture prima, poi ordine stabile
     (fr, fc), (tr, tc), is_capture = move
     return (1 if is_capture else 0, -fr, -fc, -tr, -tc)
 
@@ -86,14 +87,13 @@ def order_moves(legal_moves):
 
 def alphabeta(game, state, depth, alpha, beta, maximizing_player, root_player, deadline):
     _check_timeout(deadline)
-
     legal_moves = game.actions(state)
 
     if depth == 0 or game.is_terminal(state) or not legal_moves:
         return evaluate_state(game, state, root_player), None
 
     legal_moves = order_moves(legal_moves)
-    best_move = legal_moves[0]
+    best_move = None
 
     if maximizing_player:
         value = -math.inf
@@ -111,7 +111,6 @@ def alphabeta(game, state, depth, alpha, beta, maximizing_player, root_player, d
             alpha = max(alpha, value)
             if alpha >= beta:
                 break
-
         return value, best_move
 
     value = math.inf
@@ -134,6 +133,9 @@ def alphabeta(game, state, depth, alpha, beta, maximizing_player, root_player, d
 
 
 def playerStrategy(game, state, timeout=3):
+    global EVAL_CACHE
+    EVAL_CACHE.clear()
+
     legal_moves = game.actions(state)
     if not legal_moves:
         return None
@@ -165,8 +167,5 @@ def playerStrategy(game, state, timeout=3):
             break
         except Exception:
             break
-
-    if best_move not in legal_moves:
-        return ordered_legal_moves[0]
 
     return best_move

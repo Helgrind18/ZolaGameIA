@@ -7,8 +7,8 @@ import time
 
 # EXAMPLE VERSION
 # #######################
-from agenti import GiuseppeImp2 as playerBmodule
-from agenti import  playerExampleAlphaImplGiuseppe as playerRmodule # Nuova strategia (assegnata al Rosso)
+from agenti import playerStrategyImplPasqualeOG as playerBmodule
+from agenti import  playerStrategyImplPasqualeOG as playerRmodule # Nuova strategia (assegnata al Rosso)
 
 #import playerExampleRandom as playerBmodule
 #import playerExampleAlpha as playerRmodule
