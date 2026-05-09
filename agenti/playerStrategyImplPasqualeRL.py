@@ -10,7 +10,7 @@ WIN_SCORE = 100_000
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 WEIGHTS_FILE = os.path.join(SCRIPT_DIR, "weights_rl.json")
-LEARNING_RATE = 0.001
+LEARNING_RATE = 1e-7
 
 
 class SearchTimeout(Exception):
